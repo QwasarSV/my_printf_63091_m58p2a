@@ -4,73 +4,84 @@
 #include <stdlib.h>
 #include <string.h>
 
-int my_printf(char * restrict format, ...)/*format is the [fixed] argument (variadic function needs at least 1 argument, otherwise, whats the point)
-                                            ...elipses indicate to the compiler that any number of arguments may be passed through funciton
-                                            ... format will give a clue on how the funciton should be run. for example, it may be the number
-                                                of arguments that the funciton should utilize before terminating
-                                                ...in this case, format provides the type of the argument(s) that should be written to the standard output,
-                                                    as well as any strings that should be printed adjacent the rest of the arguments*/
+char* reverse_string(char* string){
+    char temp;
+    int length = strlen(string);
+    int midpoint = length/2;
+    for(int i = 0;i < midpoint;i++){
+        temp = string[i];
+        string[i] = string[length - 1 - i];
+        string[length - 1 - i] = temp;
+    }
+    return string;
+}
+
+char* itoa(int num){
+    char* string = malloc(sizeof(num)/sizeof(int));
+
+    //since an integer does not hold numbers after the decimal, and does not round, dividing by 10 "peels off" the last number
+    int i = 0;
+    while(num != 0){
+        string[i] = '0' + num % 10;
+        num /= 10;
+        i++;
+    }
+    //reverse string
+    return reverse_string(string);
+}
+
+int my_printf(char * restrict format, ...)
 {
-    va_list arg_param;/*va list varible (args) indicates the arguments passed into function
-                  ... va_start and va_end act as markers (cursor) of where program is in va_list (kind of like fseek/ftell)*/
-    
-    va_start(arg_param, format);/*the beggining of variable argument list (va_list -> args)
-                                  ...va_start is a macro, similar to a funciton, allows us to access arguments one at a time
-                                  ...arg_param represents the individual arguements, and format is the last argument before the
-                                     list pf variable arguments*/
-    
-    int arg_count = 0;
-    int length = strlen(format);
-    for(int i = 0;i < length;i++){
-        if(format[i] == '%') arg_count++;//counts the number of % signs, which will act as a proxy for the number of arguments
-    }
-    if(arg_count == 0)//if no '%' are counted, the input is just a bare string, and we need only to write format(the only argument) to stdout
-    {
-        // write(1,va_arg(arg_param,const void *),length); 
-        write(1,format,length); 
-        return 0;
-    }
+    va_list ap;
 
-    char *format_chars = calloc(sizeof(char), arg_count);/*holds the order of format characters, to inform how to alter arguments to strings
-                                                            since write() can only write strings to the stdout???????*/
-    int cursor = 0;
-    for(int i = 0;i < length;i++){
+    va_start(ap,format);
+
+    int format_length = strlen(format);
+
+    int i = 0;
+    while(i < format_length){
         if(format[i] == '%'){
-            format_chars[cursor] = format[i+1];//saving the format characters as a sequence of characters
-            cursor++;
+            char format_char = format[i+1];
+            switch(format_char){
+                case 's':
+                {
+                    const char *buff = va_arg(ap,const char*);
+                    write(1,buff,strlen(buff));
+                    i++;//increment i twice when format strings are involved so the format character (s,d,c,etc.) are not written to stdput
+                    break;
+                }
+                case 'c':
+                {
+                    const char *buff = va_arg(ap,const char*);
+                    write(1,buff,strlen(buff));
+                    i++;
+                    break;
+                }
+                case 'd':
+                {
+                    int buff = va_arg(ap,int);
+                    char* string = itoa(buff);
+                    write(1,string,strlen(string));
+                    i++;
+                    break;
+                }
+            }
+        }else{
+            const char* single_char = &format[i];
+            write(1,single_char,1);//will only print out characters, which are 1 byte in size
         }
+    i++;
     }
-    //still need to account for when strings are adjacent to single/multiple format strings in format
-    for(int i = 0;i < arg_count;i++){
-        char format_char = format_chars[i];
-        const char *buff = va_arg(arg_param,const char*);
-
-        switch(format_char){
-            case 's':
-                write(1,buff,strlen(buff));
-                putchar('\n');
-                break;
-            case 'c':
-                write(1,va_arg(arg_param,const char*),sizeof(arg_param));
-                
-                break; 
-            case 'p':
-                write(1,va_arg(arg_param,const void*),sizeof(arg_param));
-                break;       
-        }
-    }    
-    free(format_chars);
-    va_end(arg_param);//the end of variable argument list (va_list -> args)
-
-    return 0;
-
+    va_end(ap);
+    return EXIT_SUCCESS;
 }
 
 int main(){
     my_printf("hello world\n");
     my_printf("%s\n", "hello");
-    // my_printf("%d\n", 18);
-    // my_printf("%s -- %d\n", "hello", 18);
+    my_printf("%d\n", 18);
+    my_printf("%s -- %d\n", "hello", 18);
+    my_printf("%c\n", "h");
 
     return 0;
 }
