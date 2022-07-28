@@ -4,6 +4,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+char* dec_2_hex_to_a(int dec){
+
+char* string = calloc(sizeof(char), 3);
+
+int i = 0;
+while(dec != 0){
+    if((dec % 16) >= 10 && (dec % 16) <= 15){
+        string[i] = (dec % 16) + 55;
+        dec /= 16;
+    }else{
+        string[i] = '0' + dec % 16;
+        dec /= 16;
+    }
+    i++;
+}
+return string;
+}
+
 char* reverse_string(char* string){
     char temp;
     int length = strlen(string);
@@ -12,6 +30,18 @@ char* reverse_string(char* string){
         temp = string[i];
         string[i] = string[length - 1 - i];
         string[length - 1 - i] = temp;
+    }
+    return string;
+}
+
+char* dec_2_oct_to_a(int num){
+    char* string = malloc(sizeof(num)/sizeof(int));
+
+    int i = 0;
+    while(num != 0){
+        string[i] = '0' + num % 8;
+        num /= 8;
+        i++;
     }
     return string;
 }
@@ -26,8 +56,7 @@ char* itoa(int num){
         num /= 10;
         i++;
     }
-    //reverse string
-    return reverse_string(string);
+    return string;
 }
 
 int my_printf(char * restrict format, ...)
@@ -58,9 +87,26 @@ int my_printf(char * restrict format, ...)
                     break;
                 }
                 case 'd':
+                case 'u':
                 {
                     int buff = va_arg(ap,int);
-                    char* string = itoa(buff);
+                    char* string = reverse_string(itoa(buff));
+                    write(1,string,strlen(string));
+                    i++;
+                    break;
+                }
+                case 'o':
+                {
+                    int buff = va_arg(ap,int);
+                    char* string = reverse_string(dec_2_oct_to_a(buff));
+                    write(1,string,strlen(string));
+                    i++;
+                    break;
+                }
+                case 'x':
+                {
+                    int buff = va_arg(ap,int);
+                    char* string = reverse_string(dec_2_hex_to_a(buff));
                     write(1,string,strlen(string));
                     i++;
                     break;
@@ -79,9 +125,13 @@ int my_printf(char * restrict format, ...)
 int main(){
     my_printf("hello world\n");
     my_printf("%s\n", "hello");
-    my_printf("%d\n", 18);
     my_printf("%s -- %d\n", "hello", 18);
-    my_printf("%c\n", "h");
+    my_printf("%d\n", 18);
+    my_printf("%o\n", 9);
+    my_printf("%u\n", 18);
+    my_printf("%x -- %s\n",2147483647,"yessirr");
+    
+
 
     return 0;
 }
