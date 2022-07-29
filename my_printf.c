@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
+
 
 char* dec_2_hex_to_a(int dec){
 
@@ -26,11 +29,19 @@ char* reverse_string(char* string){
     char temp;
     int length = strlen(string);
     int midpoint = length/2;
-    for(int i = 0;i < midpoint;i++){
+    int i = 0;
+    if(string[0] == '-'){
+        i = 1;
+        length +=1;//needed to offest the -1 in below loop
+        midpoint+=1;//midpoint shifted one to the right
+    }
+    for(;i < midpoint;i++){
         temp = string[i];
-        string[i] = string[length - 1 - i];
+        string[i] = string[length - 1 - i];//length -1 to account for zero indexing
         string[length - 1 - i] = temp;
     }
+    
+
     return string;
 }
 
@@ -48,9 +59,13 @@ char* dec_2_oct_to_a(int num){
 
 char* itoa(int num){
     char* string = malloc(sizeof(num)/sizeof(int));
-
     //since an integer does not hold numbers after the decimal, and does not round, dividing by 10 "peels off" the last number
     int i = 0;
+    if(num < 0){
+        string[i] = '-';
+        num *= -1;
+        i++;
+    }
     while(num != 0){
         string[i] = '0' + num % 10;
         num /= 10;
@@ -88,7 +103,7 @@ int my_printf(char * restrict format, ...)
                 }
                 case 'd':
                 case 'u':
-                {
+                {   
                     int buff = va_arg(ap,int);
                     char* string = reverse_string(itoa(buff));
                     write(1,string,strlen(string));
@@ -111,6 +126,21 @@ int my_printf(char * restrict format, ...)
                     i++;
                     break;
                 }
+                case 'p':
+                {   
+                    int input = va_arg(ap,int);
+                    int* i = &input;
+                    
+                    if(*i < 0){
+                        *i *= -1;
+                    }
+                    char* mem_string = reverse_string(dec_2_hex_to_a(*i));
+
+                    write(1,mem_string,strlen(mem_string));
+                
+                    i++;
+                    break;
+                }
             }
         }else{
             const char* single_char = &format[i];
@@ -123,15 +153,15 @@ int my_printf(char * restrict format, ...)
 }
 
 int main(){
-    my_printf("hello world\n");
-    my_printf("%s\n", "hello");
-    my_printf("%s -- %d\n", "hello", 18);
-    my_printf("%d\n", 18);
-    my_printf("%o\n", 9);
-    my_printf("%u\n", 18);
-    my_printf("%x -- %s\n",2147483647,"yessirr");
-    
-
+    // my_printf("hello world\n");
+    // my_printf("%s\n", -4);
+    // my_printf("%s -- %d\n", "hello", 18);
+    // my_printf("%d\n", 18);
+    // my_printf("%d\n", -1867);
+    // my_printf("%o\n", 9);
+    // my_printf("%u\n", -187);
+    // my_printf("%x -- %s\n",2147483647,"yessirr");
+    my_printf("%p\n","gg");
 
     return 0;
 }
