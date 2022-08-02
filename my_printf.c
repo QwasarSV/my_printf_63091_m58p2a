@@ -77,7 +77,7 @@ int my_printf(char * restrict format, ...)
                 
             }
         }
-        if(format[i] != '%' && format[i -1] != '%'){
+        else if(format[i] != '%' && format[i -1] != '%'){
         
         char* single_char = &format[i];
         length += write(1,single_char,1);
@@ -85,6 +85,7 @@ int my_printf(char * restrict format, ...)
         i++;
 
     }
+    
     va_end(ap);
     return length;
 }
