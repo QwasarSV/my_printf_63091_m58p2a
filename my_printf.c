@@ -33,9 +33,16 @@ int my_printf(char * restrict format, ...)
                 case 'd':
                 case 'u':
                 {   
-                    int buff = va_arg(ap,int);
-                    buff =  (UINT_MAX + buff + 1);
-                    char* string = reverse_string(ltoa(buff));
+                    int unsined_input = va_arg(ap,int);
+                    if(unsined_input < 0)
+                    {
+                        long unsind_int = (long)(UINT_MAX + unsined_input + 1);
+                        char* unsind_int_string = reverse_string(ltoa(unsind_int));
+                        length += write(1,unsind_int_string,strlen(unsind_int_string));
+                        i+=2;
+                        break;
+                    }                    
+                    char* string = reverse_string(itoa(unsined_input));
                     length += write(1,string,strlen(string));
                     i+=2;
                     break;
