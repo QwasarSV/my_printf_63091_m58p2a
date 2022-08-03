@@ -17,6 +17,11 @@ int my_printf(char * restrict format, ...)
                 case 's':
                 {
                     char *buff = va_arg(ap,char*);
+                    if(buff == NULL){
+                        length += write(1,&buff,4);
+                        i+=2;
+                        break;
+                    }
                     length += write(1,buff,strlen(buff));
                     i+=2;//increment i twice when format strings are involved so the format character (s,d,c,etc.) are not written to stdput
                     break;
@@ -31,6 +36,28 @@ int my_printf(char * restrict format, ...)
                     break;
                 }
                 case 'd':
+                {   
+                    int buff = va_arg(ap,int);
+                    if(buff == 0){
+                        buff = (char)buff + 48;
+                        write(1,&buff,1);
+                        length++;
+                        i+=2;
+                        break;
+                    }
+                    char* string = reverse_string(itoa(buff));
+                    length += write(1,string,strlen(string));
+                    i+=2;
+                    break;
+                }
+                case 'o':
+                {
+                    int buff = va_arg(ap,int);
+                    char* string = reverse_string(dec_2_oct_to_a(buff));
+                    length += write(1,string,strlen(string));
+                    i+=2;
+                    break;
+                }
                 case 'u':
                 {   
                     int unsined_input = va_arg(ap,int);
@@ -43,14 +70,6 @@ int my_printf(char * restrict format, ...)
                         break;
                     }                    
                     char* string = reverse_string(itoa(unsined_input));
-                    length += write(1,string,strlen(string));
-                    i+=2;
-                    break;
-                }
-                case 'o':
-                {
-                    int buff = va_arg(ap,int);
-                    char* string = reverse_string(dec_2_oct_to_a(buff));
                     length += write(1,string,strlen(string));
                     i+=2;
                     break;
