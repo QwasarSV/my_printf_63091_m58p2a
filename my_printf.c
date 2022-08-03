@@ -18,7 +18,8 @@ int my_printf(char * restrict format, ...)
                 {
                     char *buff = va_arg(ap,char*);
                     if(buff == NULL){
-                        length += write(1,&buff,4);
+                        char* null1 = "(null)";
+                        length += write(1,null1,strlen(null1));
                         i+=2;
                         break;
                     }
@@ -29,7 +30,6 @@ int my_printf(char * restrict format, ...)
                 case 'c':
                 {
                     char single_c = va_arg(ap,int);
-                    // printf("%c",single_c);
                     write(1,&single_c,1);
                     length++;
                     i+=2;
@@ -109,7 +109,6 @@ int my_printf(char * restrict format, ...)
         }
 
     }
-    
     va_end(ap);
     return length;
 }
